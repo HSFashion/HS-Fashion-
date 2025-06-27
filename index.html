@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HS Fashion</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        header { background-color: #ff6f61; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #333; color: white; padding: 10px; text-align: center; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; cursor: pointer; }
+        .products { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
+        .product { border: 1px solid #ddd; margin: 10px; padding: 10px; width: 200px; text-align: center; border-radius: 10px; }
+        .product img { width: 100%; border-radius: 10px; }
+        .btn { background-color: #ff6f61; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        footer { background-color: #333; color: white; text-align: center; padding: 10px; position: fixed; bottom: 0; width: 100%; }
+        .form-container { display: none; padding: 20px; max-width: 400px; margin: auto; }
+        input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
+        .order-list { padding: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="siteTitle">HS Fashion</h1>
+        <p id="siteTagline">জামা-কাপড়ের নির্ভরযোগ্য অনলাইন শপ</p>
+    </header>
+
+    <nav>
+        <a onclick="showSection('products')">Products</a>
+        <a onclick="showSection('loginForm')">Login</a>
+        <a onclick="showSection('registerForm')">Register</a>
+        <a onclick="showSection('orderList')">Orders</a>
+        <a onclick="showSection('adminPanel')">Admin Panel</a>
+        <a onclick="changeLanguage()">Language</a>
+    </nav>
+
+    <section id="products" class="products"></section>
+
+    <div id="loginForm" class="form-container">
+        <h2>Login</h2>
+        <input type="text" id="loginUsername" placeholder="Username">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="btn" onclick="login()">Login</button>
+    </div>
+
+    <div id="registerForm" class="form-container">
+        <h2>Register</h2>
+        <input type="text" id="registerUsername" placeholder="Username">
+        <input type="password" id="registerPassword" placeholder="Password">
+        <button class="btn" onclick="register()">Register</button>
+    </div>
+
+    <div id="orderForm" class="form-container">
+        <h2>Order Form</h2>
+        <p id="orderProduct"></p>
+        <input type="text" id="customerName" placeholder="আপনার নাম লিখুন">
+        <input type="text" id="customerAddress" placeholder="আপনার ঠিকানা লিখুন">
+        <input type="text" id="customerPhone" placeholder="আপনার ফোন নাম্বার লিখুন">
+        <input type="text" id="bkashTrxID" placeholder="বিকাশ ট্রানজেকশন আইডি">
+        <button class="btn" onclick="confirmOrder()">Confirm Order</button>
+    </div>
+
+    <div id="orderList" class="order-list" style="display:none;">
+        <h2>Order List</h2>
+        <table>
+            <thead>
+                <tr><th>Product</th><th>Name</th><th>Address</th><th>Phone</th><th>Bkash TrxID</th></tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+        </table>
+    </div>
+
+    <div id="adminPanel" class="form-container">
+        <h2>Admin Panel - Add Product</h2>
+        <input type="text" id="newProductName" placeholder="Product Name">
+        <input type="text" id="newProductPrice" placeholder="Price">
+        <input type="text" id="newProductImage" placeholder="Image URL">
+        <button class="btn" onclick="addProduct()">Add Product</button>
+    </div>
+
+    <footer>
+        <p>HS Fashion © 2025 | বিকাশ: 01XXXXXXXXX | ক্যাশ অন ডেলিভারি</p>
+    </footer>
+
+    <script>
+        let products = [
+            { name: 'জামা', price: 500, image: 'https://via.placeholder.com/200' },
+            { name: 'পাঞ্জাবি', price: 1200, image: 'https://via.placeholder.com/200' }
+        ];
+
+        let currentProduct = '';
+        let currentPrice = 0;
+        let isBangla = true;
+
+        function showSection(sectionId) {
+            document.getElementById('products').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('orderForm').style.display = 'none';
+            document.getElementById('orderList').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById(sectionId).style.display = 'block';
+            if (sectionId === 'products') loadProducts();
+            if (sectionId === 'orderList') loadOrders();
+        }
+
+        function loadProducts() {
+            const container = document.getElementById('products');
+            container.innerHTML = '';
+            products.forEach(product => {
+                container.innerHTML += \`
+                    <div class="product">
+                        <img src="\${product.image}" alt="\${product.name}">
+                        <h3>\${product.name} - \${product.price} টাকা</h3>
+                        <button class="btn" onclick="orderNow('\${product.name}', \${product.price})">Order Now</button>
+                    </div>
+                \`;
+            });
+        }
+
+        function orderNow(product, price) {
+            currentProduct = product;
+            currentPrice = price;
+            document.getElementById('orderProduct').innerText = 'আপনি ' + product + ' অর্ডার করছেন। মূল্য: ' + price + ' টাকা।';
+            showSection('orderForm');
+        }
+
+        function confirmOrder() {
+            let name = document.getElementById('customerName').value;
+            let address = document.getElementById('customerAddress').value;
+            let phone = document.getElementById('customerPhone').value;
+            let trxID = document.getElementById('bkashTrxID').value;
+            if (name && address && phone && trxID) {
+                let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push({ product: currentProduct, name, address, phone, trxID });
+                localStorage.setItem('orders', JSON.stringify(orders));
+                alert('অর্ডার নিশ্চিত হয়েছে!');
+                showSection('products');
+            } else {
+                alert('সব তথ্য পূরণ করুন!');
+            }
+        }
+
+        function loadOrders() {
+            let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            let table = document.getElementById('ordersTable');
+            table.innerHTML = '';
+            orders.forEach(order => {
+                table.innerHTML += \`<tr><td>\${order.product}</td><td>\${order.name}</td><td>\${order.address}</td><td>\${order.phone}</td><td>\${order.trxID}</td></tr>\`;
+            });
+        }
+
+        function register() {
+            let username = document.getElementById('registerUsername').value;
+            let password = document.getElementById('registerPassword').value;
+            if (username && password) {
+                localStorage.setItem('username', username);
+                localStorage.setItem('password', password);
+                alert('রেজিস্ট্রেশন সফল! এখন লগইন করুন।');
+                showSection('loginForm');
+            } else {
+                alert('সব তথ্য দিন!');
+            }
+        }
+
+        function login() {
+            let username = document.getElementById('loginUsername').value;
+            let password = document.getElementById('loginPassword').value;
+            let storedUsername = localStorage.getItem('username');
+            let storedPassword = localStorage.getItem('password');
+
+            if (username === storedUsername && password === storedPassword) {
+                alert('লগইন সফল!');
+                showSection('products');
+            } else {
+                alert('Username অথবা Password ভুল!');
+            }
+        }
+
+        function addProduct() {
+            let name = document.getElementById('newProductName').value;
+            let price = document.getElementById('newProductPrice').value;
+            let image = document.getElementById('newProductImage').value;
+
+            if (name && price && image) {
+                products.push({ name, price, image });
+                alert('Product Added Successfully!');
+                showSection('products');
+            } else {
+                alert('সব তথ্য দিন!');
+            }
+        }
+
+        function changeLanguage() {
+            isBangla = !isBangla;
+            if (isBangla) {
+                document.getElementById('siteTitle').innerText = 'HS Fashion';
+                document.getElementById('siteTagline').innerText = 'জামা-কাপড়ের নির্ভরযোগ্য অনলাইন শপ';
+            } else {
+                document.getElementById('siteTitle').innerText = 'HS Fashion';
+                document.getElementById('siteTagline').innerText = 'Your Trusted Online Clothing Shop';
+            }
+            loadProducts();
+        }
+
+        // Default view
+        showSection('products');
+    </script>
+
+</body>
+</html>
